@@ -1,6 +1,6 @@
 // Load required packages
 const oauth2orize = require('oauth2orize');
-const uuid = require('./utils/uuid');
+const uuid = require('../utils/uuid');
 const { User, Client, Token, Code } = require('../models');
 
 // Create OAuth 2.0 server
