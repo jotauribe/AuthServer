@@ -1,20 +1,21 @@
 // Load required packages
-var express = require('express');
-var mongoose = require('mongoose');
-var bodyParser = require('body-parser');
-var ejs = require('ejs');
-var session = require('express-session');
-var passport = require('passport');
-var authController = require('./controllers/auth');
-var oauth2Controller = require('./controllers/oauth');
-var userController = require('./controllers/user');
-var clientController = require('./controllers/client');
+require('dotenv').config();
+const express = require('express');
+const mongoose = require('mongoose');
+const bodyParser = require('body-parser');
+const ejs = require('ejs');
+const session = require('express-session');
+const passport = require('passport');
+const authController = require('./controllers/auth');
+const oauth2Controller = require('./controllers/oauth');
+const userController = require('./controllers/user');
+const clientController = require('./controllers/client');
 
 // Connect to the beerlocker MongoDB
 mongoose.connect(process.env.MONGODB_CONNECTION);
 
 // Create our Express application
-var app = express();
+const app = express();
 
 // Set view engine to ejs
 app.set('view engine', 'ejs');
@@ -40,7 +41,7 @@ app.use(
 app.use(passport.initialize());
 
 // Create our Express router
-var router = express.Router();
+const router = express.Router();
 
 // Create endpoint handlers for <resource>
 /* router
@@ -77,6 +78,10 @@ router
 router
   .route('/oauth/token')
   .post(authController.isClientAuthenticated, oauth2Controller.token);
+
+router
+  .route('/home')
+  .get(authController.isAuthenticated, (req, res) => res.send('This is home'));
 
 // Register all our routes with /api
 app.use('/api', router);

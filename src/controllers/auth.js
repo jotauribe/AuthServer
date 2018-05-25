@@ -7,7 +7,7 @@ const ClientPasswordStrategy = require('passport-oauth2-client-password')
   .Strategy;
 const BearerStrategy = require('passport-http-bearer').Strategy;
 
-const { User } = require('../models');
+const { User, Client } = require('../models');
 
 /**
  * LocalStrategy
@@ -50,7 +50,7 @@ passport.deserializeUser((id, done) => {
  * the specification, in practice it is quite common.
  */
 function verifyClient(clientId, clientSecret, callback) {
-  Client.findOne({ id: userName }, function(err, client) {
+  Client.findOne({ id: clientId }, function(err, client) {
     if (err) {
       return callback(err);
     }
