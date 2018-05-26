@@ -1,23 +1,29 @@
 // Load required packages
-var { Client } = require('../models');
+const { Client } = require('../models');
+const { identity } = require('../utils');
 
 // Create endpoint /api/client for POST
-exports.postClients = function(req, res) {
+exports.addClient = function(req, res, next) {
   // Create a new instance of the Client model
-  var client = new Client();
+  try {
+    const client = new Client();
 
-  // Set the client properties that came from the POST data
-  client.name = req.body.name;
-  client.id = req.body.id;
-  client.secret = req.body.secret;
-  client.userId = req.user._id;
+    // Set the client properties that came from the POST data
+    client.name = req.body.name;
+    client.id = identity.nextId();
+    client.secret = identity.nextId();
+    client.userId = req.user._id;
 
-  // Save the client and check for errors
-  client.save(function(err) {
-    if (err) return res.send(err);
+    // Save the client and check for errors
+    client.save(function(err) {
+      if (err) return res.send(err);
+      console.log('clien was created', client);
 
-    res.json({ message: 'Client added to the locker!', data: client });
-  });
+      res.json({ message: 'New client was created', data: client });
+    });
+  } catch (error) {
+    next(error);
+  }
 };
 
 // Create endpoint /api/clients for GET

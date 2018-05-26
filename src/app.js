@@ -6,6 +6,7 @@ const bodyParser = require('body-parser');
 const ejs = require('ejs');
 const session = require('express-session');
 const passport = require('passport');
+const path = require('path');
 const authController = require('./controllers/auth');
 const oauth2Controller = require('./controllers/oauth');
 const userController = require('./controllers/user');
@@ -18,6 +19,7 @@ mongoose.connect(process.env.MONGODB_CONNECTION);
 const app = express();
 
 // Set view engine to ejs
+app.set('views', path.join(__dirname, '/views'));
 app.set('view engine', 'ejs');
 
 // Use the body-parser package in our application
@@ -65,7 +67,7 @@ router
 // Create endpoint handlers for /clients
 router
   .route('/clients')
-  .post(authController.isAuthenticated, clientController.postClients)
+  .post(authController.isAuthenticated, clientController.addClient)
   .get(authController.isAuthenticated, clientController.getClients);
 
 // Create endpoint handlers for oauth2 authorize
@@ -79,9 +81,14 @@ router
   .route('/oauth/token')
   .post(authController.isClientAuthenticated, oauth2Controller.token);
 
-router
-  .route('/home')
-  .get(authController.isAuthenticated, (req, res) => res.send('This is home'));
+//Protected resource
+router.route('/home').get(authController.isAuthenticated, (req, res, next) => {
+  try {
+    res.send('This is home');
+  } catch (error) {
+    next(error);
+  }
+});
 
 // Register all our routes with /api
 app.use('/api', router);

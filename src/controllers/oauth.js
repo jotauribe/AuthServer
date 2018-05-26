@@ -1,6 +1,6 @@
 // Load required packages
 const oauth2orize = require('oauth2orize');
-const uuid = require('../utils/uuid');
+const { identity } = require('../utils');
 const { User, Client, Token, Code } = require('../models');
 
 // Create OAuth 2.0 server
@@ -49,10 +49,10 @@ server.deserializeClient(function(id, callback) {
 server.grant(
   oauth2orize.grant.code(function(client, redirectUri, user, ares, callback) {
     // Create a new authorization code
-    var code = new Code({
-      value: uuid(),
+    const code = new Code({
+      value: identity.nextId(),
       clientId: client._id,
-      redirectUri: redirectUri,
+      redirectionURL: redirectUri,
       userId: user._id
     });
 
@@ -93,7 +93,7 @@ server.exchange(
 
         // Create a new access token
         var token = new Token({
-          value: uuid(),
+          value: identity.nextId(),
           clientId: authCode.clientId,
           userId: authCode.userId
         });
@@ -138,7 +138,7 @@ exports.authorization = [
     });
   }),
   function(req, res) {
-    res.render('dialog', {
+    res.render('desicion', {
       transactionID: req.oauth2.transactionID,
       user: req.user,
       client: req.oauth2.client

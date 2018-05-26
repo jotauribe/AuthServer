@@ -1,13 +1,12 @@
 'use strict';
 
 const passport = require('passport');
-const LocalStrategy = require('passport-local').Strategy;
 const BasicStrategy = require('passport-http').BasicStrategy;
 const ClientPasswordStrategy = require('passport-oauth2-client-password')
   .Strategy;
 const BearerStrategy = require('passport-http-bearer').Strategy;
 
-const { User, Client } = require('../models');
+const { Client, Token, User } = require('../models');
 
 /**
  * LocalStrategy
@@ -17,22 +16,22 @@ const { User, Client } = require('../models');
  * a user is logged in before asking them to approve the request.
  */
 passport.use(
-  new LocalStrategy((username, password, callback) => {
+  new BasicStrategy((username, password, callback) => {
     User.findOne({ username: username }, function(err, user) {
-      if (err) {
-        return callback(err);
-      }
+      if (err) return callback(err);
 
       // No user found with that username
       if (!user) return callback(null, false);
 
       // Make sure the password is correct
       if (user.password !== password) return callback(null, false);
+
+      return callback(null, user);
     });
   })
 );
 
-passport.serializeUser((user, done) => done(null, user.id));
+passport.serializeUser((user, done) => done(null, user._id));
 
 passport.deserializeUser((id, done) => {
   db.users.findById(id, (error, user) => done(error, user));
@@ -56,7 +55,7 @@ function verifyClient(clientId, clientSecret, callback) {
     }
 
     // No client found with that id or bad password
-    if (!client || client.secret !== password) {
+    if (!client || client.secret !== clientSecret) {
       return callback(null, false);
     }
 
@@ -65,7 +64,7 @@ function verifyClient(clientId, clientSecret, callback) {
   });
 }
 
-passport.use(new BasicStrategy(verifyClient));
+passport.use('client-basic', new BasicStrategy(verifyClient));
 
 passport.use(new ClientPasswordStrategy(verifyClient));
 
